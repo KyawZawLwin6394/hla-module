@@ -27,7 +27,7 @@ const config = {
     //db: 'mongodb://127.0.0.1:3221', 
      //db: 'mongodb+srv://dbuser:P7qBNveg8bVO1d2z@cluster0.85ozwwv.mongodb.net/cherry-k?retryWrites=true&w=majority',
     db: 'mongodb+srv://projectDev-01:O9YGEyPQvKyA3Q48@kwintechinstances.usgwoxy.mongodb.net/hla?retryWrites=true&w=majority',
-    uploadsURI: ['./uploads/cherry-k/img', './uploads/cherry-k/history', './uploads/cherry-k/phistory', './uploads/cherry-k/consent', './uploads/cherry-k/payment'],
+    uploadsURI: ['./uploads/cherry-k/img', './uploads/cherry-k/history', './uploads/cherry-k/before', './uploads/cherry-k/after', './uploads/cherry-k/consent', './uploads/cherry-k/payment', './uploads/cherry-k/email'],
     dbName:'cherry-k',
     maxLoginAttempts: 5,
     lockTime: 30 * 60 * 1000,
