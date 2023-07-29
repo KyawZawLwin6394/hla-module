@@ -48,7 +48,7 @@ exports.createHistory = async (req, res, next) => {
     res.status(200).send({
       message: 'History create success',
       success: true,
-      data: result
+      data: populatedResult
     });
   } catch (error) {
     return res.status(500).send({ "error": true, message: error.message })
