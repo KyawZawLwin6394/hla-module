@@ -44,6 +44,7 @@ exports.createHistory = async (req, res, next) => {
     if (req.body.skinCareAndCosmetic) data = { ...data, skinCareAndCosmetic: JSON.parse(req.body.skinCareAndCosmetic) }
     console.log(data)
     const result = await History.create(data);
+    const populatedResult = await History.find({ _id: result._id }).populate('consent')
     res.status(200).send({
       message: 'History create success',
       success: true,
@@ -59,7 +60,7 @@ exports.updateHistory = async (req, res, next) => {
     let files = req.files;
     let data = req.body;
     console.log(req.body)
-    if (files.consent.length > 0) {
+    if (files.consent) {
       for (const element of files.consent) {
         let imgPath = element.path.split('cherry-k')[1];
         const attachData = {
