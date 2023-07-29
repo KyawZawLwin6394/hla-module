@@ -20,12 +20,16 @@ var storage = multer.diskStorage({
             cb(null, './uploads/cherry-k/img');
         } else if (file.fieldname === "history") {
             cb(null, './uploads/cherry-k/history');
-        } else if (file.fieldname === "phistory") {
-            cb(null, './uploads/cherry-k/phistory');
+        } else if (file.fieldname === "before") {
+            cb(null, './uploads/cherry-k/before');
+        } else if (file.fieldname === "after") {
+            cb(null, './uploads/cherry-k/after');
         } else if (file.fieldname === "consent") {
             cb(null, './uploads/cherry-k/consent');
         } else if (file.fieldname === "payment") {
             cb(null, './uploads/cherry-k/payment');
+        } else if (file.fieldname === "email") {
+            cb(null, './uploads/cherry-k/email');
         }
 
     },
@@ -37,12 +41,16 @@ var storage = multer.diskStorage({
             cb(null, name + randomText + Date.now() + "." + ext)
         } else if (file.fieldname === "history") {
             cb(null, "TH-" + name + randomText + Date.now() + "." + ext)
-        } else if (file.fieldname === "phistory") {
-            cb(null, "PH-" + name + randomText + Date.now() + "." + ext)
+        } else if (file.fieldname === "before") {
+            cb(null, "BF-" + name + randomText + Date.now() + "." + ext)
+        } else if (file.fieldname === "after") {
+            cb(null, "AF-" + name + randomText + Date.now() + "." + ext)
         } else if (file.fieldname === "consent") {
             cb(null, "CS-" + name + randomText + Date.now() + "." + ext)
         } else if (file.fieldname === "payment") {
             cb(null, "PY-" + name + randomText + Date.now() + "." + ext)
+        } else if (file.fieldname === "email") {
+            cb(null, "EM-" + name + randomText + Date.now() + "." + ext)
         }
 
 
@@ -84,7 +92,11 @@ exports.upload = multer({
             maxCount: 3
         },
         {
-            name: 'phistory',
+            name: 'before',
+            maxCount: 2
+        },
+        {
+            name: 'after',
             maxCount: 2
         },
         {
@@ -94,6 +106,10 @@ exports.upload = multer({
         {
             name: 'payment',
             maxCount: 1
-        }   
+        },
+        {
+            name: 'email',
+            maxCount: 4
+        }
     ]
 );

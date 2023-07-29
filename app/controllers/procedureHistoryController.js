@@ -49,7 +49,7 @@ exports.getProcedureHistory = async (req, res) => {
 exports.getRelatedProcedureHistory = async (req, res) => {
   let { relatedAppointment, relatedTreatmentSelection } = req.query
   const result = await ProcedureHistory.find({ relatedTreatmentSelection: relatedTreatmentSelection, relatedAppointment: relatedAppointment, isDeleted: false }).populate('medicineItems.item_id customTreatmentPackages.item_id pHistory relatedAppointment relatedTreatmentSelection')
-  if (result.length===0)
+  if (result.length === 0)
     return res.status(404).json({ error: true, message: 'No Record Found' });
   return res.status(200).send({ success: true, data: result });
 };
@@ -84,8 +84,8 @@ exports.createProcedureHistory = async (req, res, next) => {
   data = { ...data, pHistory: [] };
   let files = req.files;
   try {
-    if (files.phistory.length > 0) {
-      for (const element of files.phistory) {
+    if (files.before) {
+      for (const element of files.before) {
         let imgPath = element.path.split('cherry-k')[1];
         const attachData = {
           fileName: element.originalname,
@@ -94,7 +94,21 @@ exports.createProcedureHistory = async (req, res, next) => {
         };
         const attachResult = await Attachment.create(attachData);
         console.log('attach', attachResult._id.toString());
-        data.pHistory.push(attachResult._id.toString());
+        data.before.push(attachResult._id.toString());
+      }
+    }
+
+    if (files.after) {
+      for (const element of files.after) {
+        let imgPath = element.path.split('cherry-k')[1];
+        const attachData = {
+          fileName: element.originalname,
+          imgUrl: imgPath,
+          image: imgPath.split('\\')[2]
+        };
+        const attachResult = await Attachment.create(attachData);
+        console.log('attach', attachResult._id.toString());
+        data.after.push(attachResult._id.toString());
       }
     }
     console.log(data)

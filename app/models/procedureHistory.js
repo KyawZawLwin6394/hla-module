@@ -79,7 +79,15 @@ let ProcedureHistorySchema = new Schema({
     },
     remark: {
         type: String
-    }
+    },
+    before: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'Attachments'
+    },
+    after: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'Attachments'
+    },
 });
 
 module.exports = mongoose.model('ProcedureHistories', ProcedureHistorySchema);
