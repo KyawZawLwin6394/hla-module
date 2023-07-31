@@ -127,17 +127,50 @@ exports.createProcedureHistory = async (req, res, next) => {
 
 
 exports.updateProcedureHistory = async (req, res, next) => {
+  let data = req.body;
+  data = { ...data, before: [], after: [] };
+  let files = req.files;
   try {
-    const result = await ProcedureHistory.findOneAndUpdate(
-      { _id: req.body.id },
-      req.body,
-      { new: true },
-    ).populate('medicineItems.item_id customTreatmentPackages.item_id pHistory relatedAppointment relatedTreatmentSelection')
-    return res.status(200).send({ success: true, data: result });
+    if (files.before) {
+      for (const element of files.before) {
+        let imgPath = element.path.split('cherry-k')[1];
+        const attachData = {
+          fileName: element.originalname,
+          imgUrl: imgPath,
+          image: imgPath.split('\\')[2]
+        };
+        const attachResult = await Attachment.create(attachData);
+        console.log('attach', attachResult._id.toString());
+        data.before.push(attachResult._id.toString());
+      }
+    }
+
+    if (files.after) {
+      for (const element of files.after) {
+        let imgPath = element.path.split('cherry-k')[1];
+        const attachData = {
+          fileName: element.originalname,
+          imgUrl: imgPath,
+          image: imgPath.split('\\')[2]
+        };
+        const attachResult = await Attachment.create(attachData);
+        console.log('attach', attachResult._id.toString());
+        data.after.push(attachResult._id.toString());
+      }
+    }
+    console.log(data)
+    const result = await procedureHistory.findOneAndUpdate({ _id: req.body.id }, data, { new: true }).populate('medicineItems.item_id customTreatmentPackages.item_id pHistory relatedAppointment relatedTreatmentSelection before after')
+    res.status(200).send({
+      message: 'ProcedureHistory update success',
+      success: true,
+      data: result
+    });
   } catch (error) {
-    return res.status(500).send({ "error": true, "message": error.message })
+    console.log(error);
+    return res.status(500).send({ "error": true, message: error.message });
   }
-};
+}
+
 
 exports.deleteProcedureHistory = async (req, res, next) => {
   try {
