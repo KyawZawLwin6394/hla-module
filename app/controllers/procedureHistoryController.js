@@ -48,7 +48,7 @@ exports.getProcedureHistory = async (req, res) => {
 
 exports.getRelatedProcedureHistory = async (req, res) => {
   let { relatedAppointment, relatedTreatmentSelection } = req.query
-  const result = await ProcedureHistory.find({ relatedTreatmentSelection: relatedTreatmentSelection, relatedAppointment: relatedAppointment, isDeleted: false }).populate('medicineItems.item_id customTreatmentPackages.item_id pHistory relatedAppointment relatedTreatmentSelection')
+  const result = await ProcedureHistory.find({ relatedTreatmentSelection: relatedTreatmentSelection, relatedAppointment: relatedAppointment, isDeleted: false }).populate('medicineItems.item_id customTreatmentPackages.item_id pHistory relatedAppointment relatedTreatmentSelection before after')
   if (result.length === 0)
     return res.status(404).json({ error: true, message: 'No Record Found' });
   return res.status(200).send({ success: true, data: result });
