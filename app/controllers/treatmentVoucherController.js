@@ -295,7 +295,18 @@ exports.filterTreatmentVoucher = async (req, res, next) => {
         if (relatedDoctor) query.relatedDoctor = relatedDoctor
         if (relatedPatient) query.relatedPatient = relatedPatient
         if (Object.keys(query).length === 0) return res.status(404).send({ error: true, message: 'Please Specify A Query To Use This Function' })
-        const result = await TreatmentVoucher.find(query).populate('createdBy relatedTreatment relatedAppointment relatedPatient payment relatedTreatmentSelection relatedBranch')
+        const result = await TreatmentVoucher.find(query).populate('createdBy relatedTreatment relatedAppointment relatedPatient payment relatedBranch').populate({
+            path:'relatedTreatmentSelection',
+            model:'TreatmentSelections',
+            populate:{
+                path:'relatedAppointments',
+                model:'Appointments',
+                populate:{
+                    path:'relatedDoctor',
+                    model:'Doctors'
+                }
+            }
+        })
         if (result.length === 0) return res.status(404).send({ error: true, message: "No Record Found!" })
         res.status(200).send({ success: true, data: result })
     } catch (err) {
