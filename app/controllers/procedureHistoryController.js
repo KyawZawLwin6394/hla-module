@@ -131,7 +131,7 @@ exports.updateProcedureHistory = async (req, res, next) => {
   
   let files = req.files;
   try {
-    if (files) {
+    if (files.before) {
       data = { ...data, before: [] };
       for (const element of files.before) {
         let imgPath = element.path.split('cherry-k')[1];
@@ -145,8 +145,8 @@ exports.updateProcedureHistory = async (req, res, next) => {
         data.before.push(attachResult._id.toString());
       }
     }
-
-    if (files) {
+    console.log(data)
+    if (files.after) {
       data = { ...data, after: [] };
       for (const element of files.after) {
         let imgPath = element.path.split('cherry-k')[1];
@@ -161,7 +161,7 @@ exports.updateProcedureHistory = async (req, res, next) => {
       }
     }
     console.log(data,'heree')
-    const result = await procedureHistory.findOneAndUpdate({ _id: data.id }, data, { new: true }).populate('medicineItems.item_id customTreatmentPackages.item_id pHistory relatedAppointment relatedTreatmentSelection before after')
+    const result = await procedureHistory.findOneAndUpdate({ _id: req.body._id }, data, { new: true }).populate('medicineItems.item_id customTreatmentPackages.item_id pHistory relatedAppointment relatedTreatmentSelection before after')
     res.status(200).send({
       message: 'ProcedureHistory update success',
       success: true,
