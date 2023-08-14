@@ -1,24 +1,106 @@
 'use strict';
-const ProcedureItems = require('../models/procedureItem');
-const MedicineItems = require('../models/medicineItem');
-const AccessoryItems = require('../models/accessoryItem');
+const Stock = require('../models/stock');
 
-exports.checkReorder = async (req, res) => {
+exports.listAllStocks = async (req, res) => {
+    let { keyword, role, limit, skip, relatedProcedureItems, relatedMedicineItems, relatedAccessoryItems, relatedMachine } = req.query;
+    let count = 0;
+    let page = 0;
     try {
-        const relatedMedicineItems = await MedicineItems.find({})
-        const relatedAccessoryItems = await AccessoryItems.find({})
-        const relatedProcedureItems = await ProcedureItems.find({})
-        const ProcedureItemsResult = relatedProcedureItems.filter(item => item.currentQty <= item.reOrderQuantity);
-        const AccessoryItemsResult = relatedAccessoryItems.filter(item => item.currentQty <= item.reOrderQuantity);
-        const MedicineItemsResult = relatedMedicineItems.filter(item => item.currentQty <= item.reOrderQuantity);
-        return res.status(200).send({
-            success: true, data: {
-                ProcedureItems: ProcedureItemsResult,
-                AccessoryItems: AccessoryItemsResult,
-                MedicineItems: MedicineItemsResult
+        limit = +limit <= 100 ? +limit : 10; //limit
+        skip = +skip || 0;
+        let query = { isDeleted: false },
+            regexKeyword;
+        role ? (query['role'] = role.toUpperCase()) : '';
+        keyword && /\w/.test(keyword)
+            ? (regexKeyword = new RegExp(keyword, 'i'))
+            : '';
+        regexKeyword ? (query['name'] = regexKeyword) : '';
+        let result = await Stock.find(query).populate('relatedProcedureItems relatedMedicineItems relatedAccessoryItems relatedMachine');
+        count = await Stock.find(query).count();
+        const division = count / limit;
+        page = Math.ceil(division);
+
+        res.status(200).send({
+            success: true,
+            count: count,
+            _metadata: {
+                current_page: skip / limit + 1,
+                per_page: limit,
+                page_count: page,
+                total_count: count,
             },
-        })
+            list: result,
+        });
+    } catch (e) {
+        return res.status(500).send({ error: true, message: e.message });
+    }
+};
+
+exports.getStock = async (req, res) => {
+    const { relatedProcedureItems, relatedMedicineItems, relatedAccessoryItems, relatedMachine } = req.params;
+    let query = { isDelated: false }
+    if (relatedProcedureItems) query.relatedProcedureItems = relatedProcedureItems;
+    if (relatedMedicineItems) query.relatedMedicineItems = relatedMedicineItems;
+    if (relatedAccessoryItems) query.relatedAccessoryItems = relatedAccessoryItems;
+    if (relatedMachine) query.relatedMachine = relatedMachine;
+    const result = await Stock.find(query).populate('relatedProcedureItems relatedMedicineItems relatedAccessoryItems relatedMachine')
+    if (result.length === 0)
+        return res.status(500).json({ error: true, message: 'No Record Found' });
+    return res.status(200).send({ success: true, data: result });
+};
+
+exports.createStock = async (req, res, next) => {
+    let newBody = req.body;
+    try {
+        const newStock = new Stock(newBody);
+        const result = await newStock.save();
+        res.status(200).send({
+            message: 'Stock create success',
+            success: true,
+            data: result
+        });
     } catch (error) {
-        return res.status(500).send({ error: true, message: error.message })
+        console.log(error)
+        return res.status(500).send({ "error": true, message: error.message })
+    }
+};
+
+exports.updateStock = async (req, res, next) => {
+    try {
+        const result = await Stock.findOneAndUpdate(
+            { _id: req.body.id },
+            req.body,
+            { new: true },
+        ).populate('relatedProcedureItems relatedMedicineItems relatedAccessoryItems relatedMachine')
+        return res.status(200).send({ success: true, data: result });
+    } catch (error) {
+        return res.status(500).send({ "error": true, "message": error.message })
+    }
+};
+
+exports.deleteStock = async (req, res, next) => {
+    try {
+        const result = await Stock.findOneAndUpdate(
+            { _id: req.params.id },
+            { isDeleted: true },
+            { new: true },
+        );
+        return res.status(200).send({ success: true, data: { isDeleted: result.isDeleted } });
+    } catch (error) {
+        return res.status(500).send({ "error": true, "message": error.message })
+
     }
 }
+
+exports.activateStock = async (req, res, next) => {
+    try {
+        const result = await Stock.findOneAndUpdate(
+            { _id: req.params.id },
+            { isDeleted: false },
+            { new: true },
+        );
+        return res.status(200).send({ success: true, data: { isDeleted: result.isDeleted } });
+    } catch (error) {
+        return res.status(500).send({ "error": true, "message": error.message })
+    }
+};

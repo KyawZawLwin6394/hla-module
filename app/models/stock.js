@@ -6,13 +6,13 @@ const Schema = mongoose.Schema;
 
 
 let StockSchema = new Schema({
-  relatedBranch: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Branches'
-  },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Users'
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
   },
   relatedProcedureItems: {
     type: mongoose.Schema.Types.ObjectId,
@@ -30,20 +30,20 @@ let StockSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'FixedAssets'
   },
-  currentQty: {
+  sellingPrice: {
     type: Number
   },
-  fromUnit: {
+  purchasePrice: {
     type: Number
   },
-  toUnit: {
+  qty: {
     type: Number
   },
-  totalUnit: {
+  seq: {
     type: Number
   },
-  reOrderQuantity: {
-    type: Number
+  expiredDate: {
+    type: Date
   },
   isDeleted: {
     type: Boolean,
