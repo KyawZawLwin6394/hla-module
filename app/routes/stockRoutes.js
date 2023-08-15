@@ -13,7 +13,7 @@ module.exports = (app) => {
     app.route('/api/stock/:id')
         .delete(verifyToken, catchError(stock.deleteStock))
         .post(verifyToken, catchError(stock.activateStock))
-    app.route('/api/stock/stock-record')
+    app.route('/api/stocks/stock-record')
         .get(verifyToken, catchError(stock.getStock))
     app.route('/api/stocks').get(verifyToken, catchError(stock.listAllStocks))
 };
