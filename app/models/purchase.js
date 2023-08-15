@@ -23,6 +23,10 @@ let PurchaseSchema = new Schema({
         },
         qty: Number,
         price: Number,
+        totalUnit: Number,
+        expiredDate: Date,
+        purchasePrice: Number,
+        sellingPrice: Number,
         subTotal: Number
     }],
     procedureItems: [{
@@ -32,6 +36,10 @@ let PurchaseSchema = new Schema({
         },
         qty: Number,
         price: Number,
+        totalUnit: Number,
+        expiredDate: Date,
+        purchasePrice: Number,
+        sellingPrice: Number,
         subTotal: Number
     }],
     accessoryItems: [{
@@ -41,6 +49,10 @@ let PurchaseSchema = new Schema({
         },
         qty: Number,
         price: Number,
+        totalUnit: Number,
+        expiredDate: Date,
+        purchasePrice: Number,
+        sellingPrice: Number,
         subTotal: Number
     }],
     totalQTY: {
