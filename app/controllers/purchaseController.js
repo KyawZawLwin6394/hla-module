@@ -53,7 +53,8 @@ exports.createPurchase = async (req, res, next) => {
     try {
         data.medicineItems.map(async function (element, index) {
             const { item_id, sellingPrice, purchasePrice, qty, expiredDate } = element
-            const getSeq = await Stock.find({ relatedMedicineItems: element.item_id }, { sort: { seq: -1 } })
+            const getSeq = await Stock.find({ relatedMedicineItems: element.item_id }, { sort: { seq: -1 } }).projection('seq')
+            console.log(getSeq)
             if (getSeq.length === 0) {
                 const result = await Stock.create({
                     relatedMedicineItems: item_id,
@@ -70,7 +71,7 @@ exports.createPurchase = async (req, res, next) => {
                     purchasePrice: purchasePrice,
                     qty: qty,
                     expiredDate: expiredDate,
-                    seq: getSeq[0].seq + 1
+                    seq: getSeq.seq + 1
                 })
             }
         })
@@ -146,8 +147,7 @@ exports.createPurchase = async (req, res, next) => {
         res.status(200).send({
             message: 'Purchase create success',
             success: true,
-            data: result,
-            transResult: transResult
+            data: result
         });
     } catch (error) {
         return res.status(500).send({ "error": true, message: error.message })
