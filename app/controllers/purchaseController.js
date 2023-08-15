@@ -53,9 +53,19 @@ exports.createPurchase = async (req, res, next) => {
     try {
         data.medicineItems.map(async function (element, index) {
             const { item_id, sellingPrice, purchasePrice, qty, expiredDate } = element
-            const getSeq = await Stock.find({ relatedMedicineItems: element.item_id }, { sort: { seq: -1 } }).projection('seq')
-            console.log(getSeq)
-            if (getSeq.length === 0) {
+            const latestDocument = await Stock.find({ relatedMedicineItems: element.item_id }, { seq: 1 }).sort({ _id: -1 }).limit(1).exec();
+            if (latestDocument.length > 0) {
+                console.log('exists')
+                const result = await Stock.create({
+                    relatedMedicineItems: item_id,
+                    sellingPrice: sellingPrice,
+                    purchasePrice: purchasePrice,
+                    qty: qty,
+                    expiredDate: expiredDate,
+                    seq: latestDocument[0].seq + 1
+                })
+            } else if (latestDocument.length === 0) {
+                console.log('dosent exists')
                 const result = await Stock.create({
                     relatedMedicineItems: item_id,
                     sellingPrice: sellingPrice,
@@ -64,21 +74,13 @@ exports.createPurchase = async (req, res, next) => {
                     expiredDate: expiredDate,
                     seq: 1
                 })
-            } else {
-                const result = await Stock.create({
-                    relatedMedicineItems: item_id,
-                    sellingPrice: sellingPrice,
-                    purchasePrice: purchasePrice,
-                    qty: qty,
-                    expiredDate: expiredDate,
-                    seq: getSeq.seq + 1
-                })
+
             }
         })
         data.procedureItems.map(async function (element, index) {
             const { item_id, sellingPrice, purchasePrice, qty, expiredDate } = element
-            const getSeq = await Stock.find({ relatedProcedureItems: item_id }, { sort: { seq: -1 } })
-            if (getSeq.length === 0) {
+            const latestDocument = await Stock.find({ relatedProcedureItems: item_id }, { seq: 1 }).sort({ _id: -1 }).limit(1).exec();
+            if (latestDocument.length === 0) {
                 const result = await Stock.create({
                     relatedProcedureItems: item_id,
                     sellingPrice: sellingPrice,
@@ -94,14 +96,14 @@ exports.createPurchase = async (req, res, next) => {
                     purchasePrice: purchasePrice,
                     qty: qty,
                     expiredDate: expiredDate,
-                    seq: getSeq[0].seq + 1
+                    seq: latestDocument[0].seq + 1
                 })
             }
         })
         data.accessoryItems.map(async function (element, index) {
             const { item_id, sellingPrice, purchasePrice, qty, expiredDate } = element
-            const getSeq = await Stock.find({ relatedAccessoryItems: item_id }, { sort: { seq: -1 } })
-            if (getSeq.length === 0) {
+            const latestDocument = await Stock.find({ relatedAccessoryItems: item_id }, { seq: 1 }).sort({ _id: -1 }).limit(1).exec();
+            if (latestDocument.length === 0) {
                 const result = await Stock.create({
                     relatedAccessoryItems: item_id,
                     sellingPrice: sellingPrice,
@@ -117,7 +119,7 @@ exports.createPurchase = async (req, res, next) => {
                     purchasePrice: purchasePrice,
                     qty: qty,
                     expiredDate: expiredDate,
-                    seq: getSeq[0].seq + 1
+                    seq: latestDocument[0].seq + 1
                 })
             }
         })

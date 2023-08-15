@@ -21,39 +21,72 @@ let PurchaseSchema = new Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'MedicineItems'
         },
-        qty: Number,
-        price: Number,
-        totalUnit: Number,
-        expiredDate: Date,
-        purchasePrice: Number,
-        sellingPrice: Number,
-        subTotal: Number
+        qty: {
+            type: Number
+        },
+        totalUnit: {
+            type: Number
+        },
+        expiredDate: {
+            type: Date
+        },
+        purchasePrice: {
+            type: Number
+        },
+        sellingPrice: {
+            type: Number
+        },
+        subTotal: {
+            type: Number
+        }
     }],
     procedureItems: [{
         item_id: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'ProcedureItems'
         },
-        qty: Number,
-        price: Number,
-        totalUnit: Number,
-        expiredDate: Date,
-        purchasePrice: Number,
-        sellingPrice: Number,
-        subTotal: Number
+        qty: {
+            type: Number
+        },
+        totalUnit: {
+            type: Number
+        },
+        expiredDate: {
+            type: Date
+        },
+        purchasePrice: {
+            type: Number
+        },
+        sellingPrice: {
+            type: Number
+        },
+        subTotal: {
+            type: Number
+        }
     }],
     accessoryItems: [{
         item_id: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'AccessoryItems'
         },
-        qty: Number,
-        price: Number,
-        totalUnit: Number,
-        expiredDate: Date,
-        purchasePrice: Number,
-        sellingPrice: Number,
-        subTotal: Number
+        qty: {
+            type: Number
+        },
+        totalUnit: {
+            type: Number
+        },
+        expiredDate: {
+            type: Date
+        },
+        purchasePrice: {
+            type: Number
+        },
+        sellingPrice: {
+            type: Number
+        },
+        subTotal: {
+            type: Number
+        }
     }],
     totalQTY: {
         type: Number,
