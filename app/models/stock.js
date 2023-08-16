@@ -33,6 +33,9 @@ let StockSchema = new Schema({
   totalUnit: {
     type: Number
   },
+  toUnit: {
+    type: Number
+  },
   sellingPrice: {
     type: Number
   },
