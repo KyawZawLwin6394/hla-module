@@ -30,6 +30,9 @@ let StockSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'FixedAssets'
   },
+  totalUnit: {
+    type: Number
+  },
   sellingPrice: {
     type: Number
   },
