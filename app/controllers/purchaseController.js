@@ -63,7 +63,8 @@ exports.createPurchase = async (req, res, next) => {
                     expiredDate: expiredDate,
                     seq: latestDocument[0].seq + 1
                 })
-                const mResult = await MedicineItems({ _id: item_id })
+                const mResult = await MedicineItems.find({ _id: item_id })
+                console.log(mResult)
                 const updateMedicineItems = await MedicineItems.findOneAndUpdate({ _id: item_id }, { sellingPrice: sellingPrice, purchasePrice: purchasePrice, $inc: { currentQuantity: qty, totalUnit: mResult[0].toUnit * qty } })
             } else if (latestDocument.length === 0) {
                 console.log('dosent exists')
@@ -75,7 +76,7 @@ exports.createPurchase = async (req, res, next) => {
                     expiredDate: expiredDate,
                     seq: 1
                 })
-                const mResult = await MedicineItems({ _id: item_id })
+                const mResult = await MedicineItems.find({ _id: item_id })
                 const updateMedicineItems = await MedicineItems.findOneAndUpdate({ _id: item_id }, { sellingPrice: sellingPrice, purchasePrice: purchasePrice, $inc: { currentQuantity: qty, totalUnit: mResult[0].toUnit * qty } })
 
             }
@@ -92,7 +93,7 @@ exports.createPurchase = async (req, res, next) => {
                     expiredDate: expiredDate,
                     seq: 1
                 })
-                const mResult = await ProcedureItems({ _id: item_id })
+                const mResult = await ProcedureItems.find({ _id: item_id })
                 const updateMedicineItems = await ProcedureItems.findOneAndUpdate({ _id: item_id }, { sellingPrice: sellingPrice, purchasePrice: purchasePrice, $inc: { currentQuantity: qty, totalUnit: mResult[0].toUnit * qty } })
             } else {
                 const result = await Stock.create({
@@ -103,7 +104,7 @@ exports.createPurchase = async (req, res, next) => {
                     expiredDate: expiredDate,
                     seq: latestDocument[0].seq + 1
                 })
-                const mResult = await ProcedureItems({ _id: item_id })
+                const mResult = await ProcedureItems.find({ _id: item_id })
                 const updateMedicineItems = await ProcedureItems.findOneAndUpdate({ _id: item_id }, { sellingPrice: sellingPrice, purchasePrice: purchasePrice, $inc: { currentQuantity: qty, totalUnit: mResult[0].toUnit * qty } })
             }
         })
@@ -119,7 +120,7 @@ exports.createPurchase = async (req, res, next) => {
                     expiredDate: expiredDate,
                     seq: 1
                 })
-                const mResult = await AccessoryItems({ _id: item_id })
+                const mResult = await AccessoryItems.find({ _id: item_id })
                 const updateMedicineItems = await AccessoryItems.findOneAndUpdate({ _id: item_id }, { sellingPrice: sellingPrice, purchasePrice: purchasePrice, $inc: { currentQuantity: qty, totalUnit: mResult[0].toUnit * qty } })
             } else {
                 const result = await Stock.create({
@@ -130,7 +131,7 @@ exports.createPurchase = async (req, res, next) => {
                     expiredDate: expiredDate,
                     seq: latestDocument[0].seq + 1
                 })
-                const mResult = await AccessoryItems({ _id: item_id })
+                const mResult = await AccessoryItems.find({ _id: item_id })
                 const updateMedicineItems = await AccessoryItems.findOneAndUpdate({ _id: item_id }, { sellingPrice: sellingPrice, purchasePrice: purchasePrice, $inc: { currentQuantity: qty, totalUnit: mResult[0].toUnit * qty } })
             }
         })
