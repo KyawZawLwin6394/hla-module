@@ -15,5 +15,8 @@ module.exports = (app) => {
         .post(verifyToken, catchError(stock.activateStock))
     app.route('/api/stocks/stock-record')
         .get(verifyToken, catchError(stock.getStock))
+    app.route('/api/stocks/inventory')
+        .get(verifyToken, catchError(stock.getInventoryPrice))
+
     app.route('/api/stocks').get(verifyToken, catchError(stock.listAllStocks))
 };

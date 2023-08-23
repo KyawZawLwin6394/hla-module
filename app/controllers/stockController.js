@@ -1,5 +1,21 @@
 'use strict';
 const Stock = require('../models/stock');
+const MedicineItems = require('../models/medicineItem');
+const AccessoryItems = require('../models/accessoryItem');
+const ProcedureItems = require('../models/procedureItem');
+
+exports.getInventoryPrice = async (req, res) => {
+    const response = {}
+    const medItems = await MedicineItems.find({})
+    const accItems = await AccessoryItems.find({})
+    const proItems = await ProcedureItems.find({})
+    for (const i of medItems) {
+        const result = await Stock.find({ relatedMedicineItems: i._id })
+        const totalInventory = result.reduce((item, accumulator) => item.batchPrice || 0 + accumulator, 0)
+        response['medicineItems'] = totalInventory
+    }
+    return res.status(200).send({ success: true, data: response })
+}
 
 exports.listAllStocks = async (req, res) => {
     let { keyword, role, limit, skip, relatedProcedureItems, relatedMedicineItems, relatedAccessoryItems, relatedMachine } = req.query;

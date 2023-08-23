@@ -56,6 +56,9 @@ let StockSchema = new Schema({
     required: true,
     default: false
   },
+  batchPrice: {
+    type: Number
+  }
 });
 
 module.exports = mongoose.model('Stocks', StockSchema);
