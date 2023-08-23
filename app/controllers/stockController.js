@@ -11,8 +11,18 @@ exports.getInventoryPrice = async (req, res) => {
     const proItems = await ProcedureItems.find({})
     for (const i of medItems) {
         const result = await Stock.find({ relatedMedicineItems: i._id })
-        const totalInventory = result.reduce((item, accumulator) => item.batchPrice || 0 + accumulator, 0)
+        const totalInventory = result.reduce((accumulator, item) => accumulator + (item.batchPrice || 0), 0);
         response['medicineItems'] = totalInventory
+    }
+    for (const i of accItems) {
+        const result = await Stock.find({ relatedAccessoryItems: i._id })
+        const totalInventory = result.reduce((accumulator, item) => accumulator + (item.batchPrice || 0), 0);
+        response['accessoryItems'] = totalInventory
+    }
+    for (const i of proItems) {
+        const result = await Stock.find({ relatedProcedureItems: i._id })
+        const totalInventory = result.reduce((accumulator, item) => accumulator + (item.batchPrice || 0), 0);
+        response['procedureItems'] = totalInventory
     }
     return res.status(200).send({ success: true, data: response })
 }
