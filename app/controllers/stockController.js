@@ -5,25 +5,39 @@ const AccessoryItems = require('../models/accessoryItem');
 const ProcedureItems = require('../models/procedureItem');
 
 exports.getInventoryPrice = async (req, res) => {
-    const response = {}
+    let medicineItems = []
+    let accessoryItems = []
+    let procedureItems = []
+    const response = {
+
+    }
     const medItems = await MedicineItems.find({})
     const accItems = await AccessoryItems.find({})
     const proItems = await ProcedureItems.find({})
     for (const i of medItems) {
+        console.log(i.medicineItemName, 'name')
         const result = await Stock.find({ relatedMedicineItems: i._id })
-        const totalInventory = result.reduce((accumulator, item) => accumulator + (item.batchPrice || 0), 0);
-        response['medicineItems'] = totalInventory
+        const totalInventory = result.reduce((accumulator, item) => {
+            const total = accumulator + (item.batchPrice || 0)
+            console.log(total, 'total', item.batchPrice)
+            return total
+        }, 0);
+        console.log(totalInventory, 'total')
+        medicineItems.push(totalInventory)
     }
     for (const i of accItems) {
         const result = await Stock.find({ relatedAccessoryItems: i._id })
         const totalInventory = result.reduce((accumulator, item) => accumulator + (item.batchPrice || 0), 0);
-        response['accessoryItems'] = totalInventory
+        accessoryItems.push(totalInventory)
     }
     for (const i of proItems) {
         const result = await Stock.find({ relatedProcedureItems: i._id })
         const totalInventory = result.reduce((accumulator, item) => accumulator + (item.batchPrice || 0), 0);
-        response['procedureItems'] = totalInventory
+        procedureItems.push(totalInventory)
     }
+    response.medicineItems = medicineItems.reduce((accumulator, value) => accumulator + value)
+    response.accessoryItems = accessoryItems.reduce((accumulator, value) => accumulator + value)
+    response.procedureItems = procedureItems.reduce((accumulator, value) => accumulator + value)
     return res.status(200).send({ success: true, data: response })
 }
 
