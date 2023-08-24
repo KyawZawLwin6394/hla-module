@@ -60,7 +60,7 @@ exports.createPurchase = async (req, res, next) => {
                     sellingPrice: sellingPrice,
                     purchasePrice: purchasePrice,
                     qty: qty,
-                    batchPrice: qty * sellingPrice,
+                    batchPrice: qty * purchasePrice,
                     expiredDate: expiredDate,
                     seq: latestDocument[0].seq + 1
                 })
@@ -72,7 +72,7 @@ exports.createPurchase = async (req, res, next) => {
                 const result = await Stock.create({
                     relatedMedicineItems: item_id,
                     sellingPrice: sellingPrice,
-                    batchPrice: qty * sellingPrice,
+                    batchPrice: qty * purchasePrice,
                     purchasePrice: purchasePrice,
                     qty: qty,
                     expiredDate: expiredDate,
@@ -91,7 +91,7 @@ exports.createPurchase = async (req, res, next) => {
                     relatedProcedureItems: item_id,
                     sellingPrice: sellingPrice,
                     purchasePrice: purchasePrice,
-                    batchPrice: qty * sellingPrice,
+                    batchPrice: qty * purchasePrice,
                     qty: qty,
                     expiredDate: expiredDate,
                     seq: 1
@@ -103,7 +103,7 @@ exports.createPurchase = async (req, res, next) => {
                     relatedProcedureItems: item_id,
                     sellingPrice: sellingPrice,
                     purchasePrice: purchasePrice,
-                    batchPrice: qty * sellingPrice,
+                    batchPrice: qty * purchasePrice,
                     qty: qty,
                     expiredDate: expiredDate,
                     seq: latestDocument[0].seq + 1
@@ -120,7 +120,7 @@ exports.createPurchase = async (req, res, next) => {
                     relatedAccessoryItems: item_id,
                     sellingPrice: sellingPrice,
                     purchasePrice: purchasePrice,
-                    batchPrice: qty * sellingPrice,
+                    batchPrice: qty * purchasePrice,
                     qty: qty,
                     expiredDate: expiredDate,
                     seq: 1
@@ -132,7 +132,7 @@ exports.createPurchase = async (req, res, next) => {
                     relatedAccessoryItems: item_id,
                     sellingPrice: sellingPrice,
                     purchasePrice: purchasePrice,
-                    batchPrice: qty * sellingPrice,
+                    batchPrice: qty * purchasePrice,
                     qty: qty,
                     expiredDate: expiredDate,
                     seq: latestDocument[0].seq + 1
