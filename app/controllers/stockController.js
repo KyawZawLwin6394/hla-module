@@ -9,7 +9,6 @@ exports.getInventoryPrice = async (req, res) => {
     let accessoryItems = []
     let procedureItems = []
     const response = {
-
     }
     const medItems = await MedicineItems.find({})
     const accItems = await AccessoryItems.find({})
