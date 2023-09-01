@@ -1,22 +1,23 @@
 'use strict';
 const DamagedItem = require('../models/damagedItem');
+const Stock = require('../models/stock');
 
 exports.listAllDamagedItems = async (req, res) => {
   try {
-    let result = await DamagedItem.find({isDeleted:false});
-    let count = await DamagedItem.find({isDeleted:false}).count();
+    let result = await DamagedItem.find({ isDeleted: false });
+    let count = await DamagedItem.find({ isDeleted: false }).count();
     res.status(200).send({
       success: true,
       count: count,
       data: result
     });
   } catch (error) {
-    return res.status(500).send({ error:true, message:'No Record Found!'});
+    return res.status(500).send({ error: true, message: 'No Record Found!' });
   }
 };
 
 exports.getDamagedItem = async (req, res) => {
-  const result = await DamagedItem.find({ _id: req.params.id,isDeleted:false });
+  const result = await DamagedItem.find({ _id: req.params.id, isDeleted: false });
   if (!result)
     return res.status(500).json({ error: true, message: 'No Record Found' });
   return res.status(200).send({ success: true, data: result });
@@ -24,12 +25,15 @@ exports.getDamagedItem = async (req, res) => {
 
 exports.createDamagedItem = async (req, res, next) => {
   try {
+    const { relatedStockRecord, damagedCurrentQty, damagedTotalUnit } = req.body;
+    const stockUpdate = await Stock.findOneAndUpdate({ _id: relatedStockRecord }, { $inc: { qty: -damagedCurrentQty, totalUnit: -damagedTotalUnit } }, { new: true })
     const newDamagedItem = new DamagedItem(req.body);
     const result = await newDamagedItem.save();
     res.status(200).send({
       message: 'DamagedItem create success',
       success: true,
-      data: result
+      data: result,
+      update: stockUpdate
     });
   } catch (error) {
     return res.status(500).send({ "error": true, message: error.message })
