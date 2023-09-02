@@ -4,7 +4,7 @@ const Stock = require('../models/stock');
 
 exports.listAllDamagedItems = async (req, res) => {
   try {
-    let result = await DamagedItem.find({ isDeleted: false });
+    let result = await DamagedItem.find({ isDeleted: false }).populate('relatedStockRecord');
     let count = await DamagedItem.find({ isDeleted: false }).count();
     res.status(200).send({
       success: true,
