@@ -3,6 +3,7 @@ const ProcedureHistory = require('../models/procedureHistory');
 const Attachment = require('../models/attachment');
 const procedureHistory = require('../models/procedureHistory');
 const MedicineItems = require('../models/medicineItem');
+const stock = require('../models/stock');
 
 exports.listAllProcedureHistorys = async (req, res) => {
   let { keyword, role, limit, skip } = req.query;
@@ -81,6 +82,7 @@ exports.uploadImage = async (req, res) => {
 
 exports.createProcedureHistory = async (req, res, next) => {
   let data = req.body;
+  const { medicineItems } = req.body;
   data = { ...data, before: [], after: [] };
   let files = req.files;
   try {
@@ -111,7 +113,40 @@ exports.createProcedureHistory = async (req, res, next) => {
         data.after.push(attachResult._id.toString());
       }
     }
-    console.log(data)
+    if (medicineItems) {
+      try {
+        const parsed = JSON.parse(medicineItems);
+
+        for (const item of parsed) {
+          let { item_id, qty } = item;
+          console.log(item_id, 'here');
+          const findResult = await stock.find({ relatedMedicineItems: item_id._id }).sort({ seq: -1 });
+          const totalQty = findResult.reduce((accumulator, value) => accumulator + value.qty, 0);
+
+          if (qty > totalQty) {
+            return res.status(404).send({ error: true, message: 'Not Enough Qty', medicineID: item_id });
+          }
+
+          for (const i of findResult) {
+            if (i.qty <= qty) {
+              await stock.findOneAndUpdate({ _id: i._id }, { $set: { isDeleted: true } });
+              qty -= i.qty;
+            } else {
+              await stock.findOneAndUpdate({ _id: i._id }, { $inc: { qty: -qty } });
+              qty = 0;
+            }
+          }
+        }
+
+        // Assuming you want to update 'data' after processing medicine items
+        data = { ...data, medicineItems: parsed };
+
+      } catch (error) {
+        // Handle JSON parsing errors or other potential errors gracefully
+        return res.status(500).send({ error: true, message: error });
+      }
+    }
+
     const result = await procedureHistory.create(data);
     const populate = await procedureHistory.find({ _id: result._id }).populate('medicineItems.item_id customTreatmentPackages.item_id pHistory relatedAppointment relatedTreatmentSelection')
     res.status(200).send({
@@ -128,7 +163,7 @@ exports.createProcedureHistory = async (req, res, next) => {
 
 exports.updateProcedureHistory = async (req, res, next) => {
   let data = req.body;
-  
+
   let files = req.files;
   try {
     if (files.before) {
@@ -160,7 +195,7 @@ exports.updateProcedureHistory = async (req, res, next) => {
         data.after.push(attachResult._id.toString());
       }
     }
-    console.log(data,'heree')
+    console.log(data, 'heree')
     const result = await procedureHistory.findOneAndUpdate({ _id: req.body._id }, data, { new: true }).populate('medicineItems.item_id customTreatmentPackages.item_id pHistory relatedAppointment relatedTreatmentSelection before after')
     res.status(200).send({
       message: 'ProcedureHistory update success',
