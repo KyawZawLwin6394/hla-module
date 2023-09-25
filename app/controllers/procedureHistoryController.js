@@ -120,7 +120,7 @@ exports.createProcedureHistory = async (req, res, next) => {
         for (const item of parsed) {
           let { item_id, qty } = item;
           console.log(item_id, 'here');
-          const findResult = await stock.find({ relatedMedicineItems: item_id._id }).sort({ seq: -1 });
+          const findResult = await stock.find({ relatedMedicineItems: item_id._id, isDeleted: false }).sort({ seq: -1 });
           const totalQty = findResult.reduce((accumulator, value) => accumulator + value.qty, 0);
 
           if (qty > totalQty) {
@@ -137,7 +137,6 @@ exports.createProcedureHistory = async (req, res, next) => {
             }
           }
         }
-
         // Assuming you want to update 'data' after processing medicine items
         data = { ...data, medicineItems: parsed };
 

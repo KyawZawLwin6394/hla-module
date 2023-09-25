@@ -5,6 +5,7 @@ const AccessoryItem = require('../models/accessoryItem');
 const Machine = require('../models/fixedAsset');
 const Usage = require('../models/usage');
 const UsageRecords = require('../models/usageRecord');
+const stock = require('../models/stock');
 
 exports.listAllLog = async (req, res) => {
   try {
@@ -77,119 +78,74 @@ exports.createUsage = async (req, res) => {
     if (appResult[0].relatedUsage === undefined) {
 
       if (procedureMedicine !== undefined) {
-        for (const e of procedureMedicine) {
-          if (e.stock < e.actual) {
-            procedureItemsError.push(e);
-          } else if (e.stock > e.actual) {
-            let totalUnit = e.stock - e.actual;
-            const result = await ProcedureItem.find({ _id: e.item_id });
-            const from = result[0].fromUnit;
-            const to = result[0].toUnit;
-            const currentQty = (from * totalUnit) / to;
-            try {
-              const result = await ProcedureItem.findOneAndUpdate(
-                { _id: e.item_id },
-                { totalUnit: totalUnit, currentQty: currentQty },
-                { new: true }
-              );
-            } catch (error) {
-              procedureItemsError.push(e);
+        for (const item of procedureMedicine) {
+          let { item_id, actual } = item;
+          console.log(item_id, 'here');
+          const findResult = await stock.find({ relatedProcedureItems: item_id, isDeleted: false }).sort({ seq: -1 });
+          const totalQty = findResult.reduce((accumulator, value) => accumulator + value.qty, 0);
+
+          if (actual > totalQty) {
+            return res.status(404).send({ error: true, message: 'Not Enough Qty', procedureItem: item_id });
+          }
+
+          for (const i of findResult) {
+            if (i.qty <= actual) {
+              await stock.findOneAndUpdate({ _id: i._id }, { $set: { isDeleted: true } });
+              actual -= i.qty;
+            } else {
+              await stock.findOneAndUpdate({ _id: i._id }, { $inc: { qty: -actual } });
+              actual = 0;
             }
-            procedureItemsFinished.push(e);
-            const logResult = await Log.create({
-              "relatedTreatmentSelection": relatedTreatmentSelection,
-              "relatedAppointment": relatedAppointment,
-              "relatedProcedureItems": e.item_id,
-              "currentQty": e.stock,
-              "actualQty": e.actual,
-              "finalQty": totalUnit,
-              "type": "Usage",
-              "createdBy": createdBy
-            });
           }
         }
       }
-
-
-
       //procedureAccessory
-
       if (procedureAccessory !== undefined) {
         for (const e of procedureAccessory) {
-          if (e.stock < e.actual) {
-            accessoryItemsError.push(e)
-          } else if (e.stock > e.actual) {
-            let totalUnit = e.stock - e.actual
-            const result = await AccessoryItem.find({ _id: e.item_id })
-            const from = result[0].fromUnit
-            const to = result[0].toUnit
-            const currentQty = (from * totalUnit) / to
-            try {
-              accessoryItemsFinished.push(e)
-              const result = await AccessoryItem.findOneAndUpdate(
-                { _id: e.item_id },
-                { totalUnit: totalUnit, currentQty: currentQty },
-                { new: true },
-              )
+          let { item_id, actual } = item;
+          console.log(item_id, 'here');
+          const findResult = await stock.find({ relatedAccessoryItems: item_id, isDeleted: false }).sort({ seq: -1 });
+          const totalQty = findResult.reduce((accumulator, value) => accumulator + value.qty, 0);
 
-            } catch (error) {
-              accessoryItemsError.push(e)
+          if (actual > totalQty) {
+            return res.status(404).send({ error: true, message: 'Not Enough Qty', procedureItem: item_id });
+          }
+
+          for (const i of findResult) {
+            if (i.qty <= actual) {
+              await stock.findOneAndUpdate({ _id: i._id }, { $set: { isDeleted: true } });
+              actual -= i.qty;
+            } else {
+              await stock.findOneAndUpdate({ _id: i._id }, { $inc: { qty: -actual } });
+              actual = 0;
             }
-            const logResult = await Log.create({
-              "relatedTreatmentSelection": relatedTreatmentSelection,
-              "relatedAppointment": relatedAppointment,
-              "relatedAccessoryItems": e.item_id,
-              "currentQty": e.stock,
-              "actualQty": e.actual,
-              "finalQty": totalUnit,
-              "type": "Usage",
-
-              "createdBy": createdBy
-            })
           }
         }
       }
-
       //machine
-
       if (machine !== undefined) {
         for (const e of machine) {
-          if (e.stock < e.actual) {
-            machineError.push(e)
-          } else if (e.stock > e.actual) {
-            let totalUnit = e.stock - e.actual
-            const result = await Machine.find({ _id: e.item_id })
-            const from = result[0].fromUnit
-            const to = result[0].toUnit
-            const currentQty = (from * totalUnit) / to
-            try {
-              machineFinished.push(e)
-              const result = await Machine.findOneAndUpdate(
-                { _id: e.item_id },
-                { totalUnit: totalUnit, currentQty: currentQty },
-                { new: true },
-              )
+          let { item_id, actual } = item;
+          console.log(item_id, 'here');
+          const findResult = await stock.find({ relatedMachine: item_id, isDeleted: false }).sort({ seq: -1 });
+          const totalQty = findResult.reduce((accumulator, value) => accumulator + value.qty, 0);
 
-            } catch (error) {
-              machineError.push(e)
+          if (actual > totalQty) {
+            return res.status(404).send({ error: true, message: 'Not Enough Qty', procedureItem: item_id });
+          }
+
+          for (const i of findResult) {
+            if (i.qty <= actual) {
+              await stock.findOneAndUpdate({ _id: i._id }, { $set: { isDeleted: true } });
+              actual -= i.qty;
+            } else {
+              await stock.findOneAndUpdate({ _id: i._id }, { $inc: { qty: -actual } });
+              actual = 0;
             }
-            const logResult = await Log.create({
-              "relatedTreatmentSelection": relatedTreatmentSelection,
-              "relatedAppointment": relatedAppointment,
-              "relatedMachine": e.item_id,
-              "currentQty": e.stock,
-              "actualQty": e.actual,
-              "finalQty": totalUnit,
-              "type": "Usage",
-
-              "createdBy": createdBy
-            })
           }
         }
       }
       //usage create
-      if (machineError.length > 0 || procedureItemsError.length > 0 || accessoryItemsError.length > 0) status = 'In Progress'
-      if (machineError.length === 0 && procedureItemsError.length === 0 && accessoryItemsError.length === 0) status = 'Finished'
       req.body = { ...req.body, machineError: machineError, usageStatus: status, procedureItemsError: procedureItemsError, accessoryItemsError: accessoryItemsError, procedureAccessory: accessoryItemsFinished, procedureMedicine: procedureItemsFinished, machine: machineFinished }
       var usageResult = await Usage.create(req.body);
       var appointmentUpdate = await Appointment.findOneAndUpdate(
@@ -209,166 +165,166 @@ exports.createUsage = async (req, res) => {
         accessoryItemsError: accessoryItemsError
       })
     }
-    else {
-      var usageRecordResult = await UsageRecords.find({ relatedUsage: appResult[0].relatedUsage }, { sort: { createdAt: -1 } })
-      if (usageRecordResult.length > 0) {
-        var URResult = await UsageRecords.find({ _id: usageRecordResult[0]._id })
-      }
-      const newMachine = req.body.machine.filter(value => {
-        const match = URResult[0].machineError.some(errorItem => errorItem.item_id.toString() === value.item_id);
-        return match;
-      });
+    // else {
+    //   var usageRecordResult = await UsageRecords.find({ relatedUsage: appResult[0].relatedUsage }, { sort: { createdAt: -1 } })
+    //   if (usageRecordResult.length > 0) {
+    //     var URResult = await UsageRecords.find({ _id: usageRecordResult[0]._id })
+    //   }
+    //   const newMachine = req.body.machine.filter(value => {
+    //     const match = URResult[0].machineError.some(errorItem => errorItem.item_id.toString() === value.item_id);
+    //     return match;
+    //   });
 
-      const newPA = req.body.procedureAccessory.filter(value => {
-        const match = URResult[0].accessoryItemsError.some(errorItem => errorItem.item_id.toString() === value.item_id);
-        return match;
-      });
+    //   const newPA = req.body.procedureAccessory.filter(value => {
+    //     const match = URResult[0].accessoryItemsError.some(errorItem => errorItem.item_id.toString() === value.item_id);
+    //     return match;
+    //   });
 
-      const newPM = req.body.procedureMedicine.filter(value => {
-        const match = URResult[0].procedureItemsError.some(errorItem => errorItem.item_id.toString() === value.item_id);
-        return match;
-      });
+    //   const newPM = req.body.procedureMedicine.filter(value => {
+    //     const match = URResult[0].procedureItemsError.some(errorItem => errorItem.item_id.toString() === value.item_id);
+    //     return match;
+    //   });
 
-      if (newPM.length > 0) {
-        for (const e of newPM) {
-          if (e.stock < e.actual) {
-            procedureItemsError.push(e)
-          } else if (e.stock > e.actual) {
-            let totalUnit = e.stock - e.actual
-            const result = await ProcedureItem.find({ _id: e.item_id })
-            const from = result[0].fromUnit
-            const to = result[0].toUnit
-            const currentQty = (from * totalUnit) / to
-            try {
-              procedureItemsFinished.push(e)
-              const result = await ProcedureItem.findOneAndUpdate(
-                { _id: e.item_id },
-                { totalUnit: totalUnit, currentQty: currentQty },
-                { new: true },
-              )
+    //   if (newPM.length > 0) {
+    //     for (const e of newPM) {
+    //       if (e.stock < e.actual) {
+    //         procedureItemsError.push(e)
+    //       } else if (e.stock > e.actual) {
+    //         let totalUnit = e.stock - e.actual
+    //         const result = await ProcedureItem.find({ _id: e.item_id })
+    //         const from = result[0].fromUnit
+    //         const to = result[0].toUnit
+    //         const currentQty = (from * totalUnit) / to
+    //         try {
+    //           procedureItemsFinished.push(e)
+    //           const result = await ProcedureItem.findOneAndUpdate(
+    //             { _id: e.item_id },
+    //             { totalUnit: totalUnit, currentQty: currentQty },
+    //             { new: true },
+    //           )
 
-            } catch (error) {
-              procedureItemsError.push(e);
-            }
-            const logResult = await Log.create({
-              "relatedTreatmentSelection": relatedTreatmentSelection,
-              "relatedAppointment": relatedAppointment,
-              "relatedProcedureItems": e.item_id,
-              "currentQty": e.stock,
-              "actualQty": e.actual,
-              "finalQty": totalUnit,
-              "type": "Usage",
-              "createdBy": createdBy
-            })
-          }
-        }
-      }
+    //         } catch (error) {
+    //           procedureItemsError.push(e);
+    //         }
+    //         const logResult = await Log.create({
+    //           "relatedTreatmentSelection": relatedTreatmentSelection,
+    //           "relatedAppointment": relatedAppointment,
+    //           "relatedProcedureItems": e.item_id,
+    //           "currentQty": e.stock,
+    //           "actualQty": e.actual,
+    //           "finalQty": totalUnit,
+    //           "type": "Usage",
+    //           "createdBy": createdBy
+    //         })
+    //       }
+    //     }
+    //   }
 
-      //procedureAccessory
+    //   //procedureAccessory
 
-      if (newPA !== undefined) {
-        for (const e of newPA) {
-          if (e.stock < e.actual) {
-            accessoryItemsError.push(e)
-          } else if (e.stock > e.actual) {
-            let totalUnit = e.stock - e.actual
-            const result = await AccessoryItem.find({ _id: e.item_id })
-            const from = result[0].fromUnit
-            const to = result[0].toUnit
-            const currentQty = (from * totalUnit) / to
-            try {
-              accessoryItemsFinished.push(e)
-              const result = await AccessoryItem.findOneAndUpdate(
-                { _id: e.item_id },
-                { totalUnit: totalUnit, currentQty: currentQty },
-                { new: true },
-              )
+    //   if (newPA !== undefined) {
+    //     for (const e of newPA) {
+    //       if (e.stock < e.actual) {
+    //         accessoryItemsError.push(e)
+    //       } else if (e.stock > e.actual) {
+    //         let totalUnit = e.stock - e.actual
+    //         const result = await AccessoryItem.find({ _id: e.item_id })
+    //         const from = result[0].fromUnit
+    //         const to = result[0].toUnit
+    //         const currentQty = (from * totalUnit) / to
+    //         try {
+    //           accessoryItemsFinished.push(e)
+    //           const result = await AccessoryItem.findOneAndUpdate(
+    //             { _id: e.item_id },
+    //             { totalUnit: totalUnit, currentQty: currentQty },
+    //             { new: true },
+    //           )
 
-            } catch (error) {
-              accessoryItemsError.push(e)
-            }
-            const logResult = await Log.create({
-              "relatedTreatmentSelection": relatedTreatmentSelection,
-              "relatedAppointment": relatedAppointment,
-              "relatedAccessoryItems": e.item_id,
-              "currentQty": e.stock,
-              "actualQty": e.actual,
-              "finalQty": totalUnit,
-              "type": "Usage",
+    //         } catch (error) {
+    //           accessoryItemsError.push(e)
+    //         }
+    //         const logResult = await Log.create({
+    //           "relatedTreatmentSelection": relatedTreatmentSelection,
+    //           "relatedAppointment": relatedAppointment,
+    //           "relatedAccessoryItems": e.item_id,
+    //           "currentQty": e.stock,
+    //           "actualQty": e.actual,
+    //           "finalQty": totalUnit,
+    //           "type": "Usage",
 
-              "createdBy": createdBy
-            })
-          }
-        }
-      }
+    //           "createdBy": createdBy
+    //         })
+    //       }
+    //     }
+    //   }
 
-      //machine
+    //   //machine
 
-      if (newMachine !== undefined) {
-        for (const e of newMachine) {
-          if (e.stock < e.actual) {
-            machineError.push(e)
-          } else if (e.stock > e.actual) {
-            let totalUnit = e.stock - e.actual
-            const result = await Machine.find({ _id: e.item_id })
-            const from = result[0].fromUnit
-            const to = result[0].toUnit
-            const currentQty = (from * totalUnit) / to
-            try {
-              machineFinished.push(e)
-              const result = await Stock.findOneAndUpdate(
-                { _id: e.item_id },
-                { totalUnit: totalUnit, currentQty: currentQty },
-                { new: true },
-              )
+    //   if (newMachine !== undefined) {
+    //     for (const e of newMachine) {
+    //       if (e.stock < e.actual) {
+    //         machineError.push(e)
+    //       } else if (e.stock > e.actual) {
+    //         let totalUnit = e.stock - e.actual
+    //         const result = await Machine.find({ _id: e.item_id })
+    //         const from = result[0].fromUnit
+    //         const to = result[0].toUnit
+    //         const currentQty = (from * totalUnit) / to
+    //         try {
+    //           machineFinished.push(e)
+    //           const result = await Stock.findOneAndUpdate(
+    //             { _id: e.item_id },
+    //             { totalUnit: totalUnit, currentQty: currentQty },
+    //             { new: true },
+    //           )
 
-            } catch (error) {
-              machineError.push(e)
-            }
-            const logResult = await Log.create({
-              "relatedTreatmentSelection": relatedTreatmentSelection,
-              "relatedAppointment": relatedAppointment,
-              "relatedMachine": e.item_id,
-              "currentQty": e.stock,
-              "actualQty": e.actual,
-              "finalQty": totalUnit,
-              "type": "Usage",
-              "createdBy": createdBy
-            })
-          }
-        }
-      }
-      req.body = { ...req.body, machineError: machineError, procedureItemsError: procedureItemsError, accessoryItemsError: accessoryItemsError }
-      if (machineError.length > 0 || procedureItemsError.length > 0 || accessoryItemsError.length > 0) status = 'In Progress'
-      if (machineError.length === 0 && procedureItemsError.length === 0 && accessoryItemsError.length === 0) status = 'Finished'
-      var usageUpdate = await Usage.findOneAndUpdate(
-        { _id: appResult[0].relatedUsage },
-        {
-          $push: {
-            procedureAccessory: { $each: accessoryItemsFinished },
-            procedureMedicine: { $each: procedureItemsFinished },
-            machine: { $each: machineFinished }
-          },
-          procedureItemsError: procedureItemsError,
-          accessoryItemsError: accessoryItemsError,
-          machineError: machineError,
-          usageStatus: status,
-          relatedBranch: req.mongoQuery.relatedBranch
-        },
-        { new: true }
-      );
-      var usageRecordResult = await UsageRecords.create({
-        relatedUsage: usageUpdate._id,
-        usageStatus: status,
-        procedureMedicine: procedureItemsFinished,
-        procedureAccessory: accessoryItemsFinished,
-        machine: machineFinished,
-        relatedBranch: req.mongoQuery.relatedBranch,
-        machineError: machineError,
-        procedureItemsError: procedureItemsError,
-        accessoryItemsError: accessoryItemsError
-      })
-    }
+    //         } catch (error) {
+    //           machineError.push(e)
+    //         }
+    //         const logResult = await Log.create({
+    //           "relatedTreatmentSelection": relatedTreatmentSelection,
+    //           "relatedAppointment": relatedAppointment,
+    //           "relatedMachine": e.item_id,
+    //           "currentQty": e.stock,
+    //           "actualQty": e.actual,
+    //           "finalQty": totalUnit,
+    //           "type": "Usage",
+    //           "createdBy": createdBy
+    //         })
+    //       }
+    //     }
+    //   }
+    //   req.body = { ...req.body, machineError: machineError, procedureItemsError: procedureItemsError, accessoryItemsError: accessoryItemsError }
+    //   if (machineError.length > 0 || procedureItemsError.length > 0 || accessoryItemsError.length > 0) status = 'In Progress'
+    //   if (machineError.length === 0 && procedureItemsError.length === 0 && accessoryItemsError.length === 0) status = 'Finished'
+    //   var usageUpdate = await Usage.findOneAndUpdate(
+    //     { _id: appResult[0].relatedUsage },
+    //     {
+    //       $push: {
+    //         procedureAccessory: { $each: accessoryItemsFinished },
+    //         procedureMedicine: { $each: procedureItemsFinished },
+    //         machine: { $each: machineFinished }
+    //       },
+    //       procedureItemsError: procedureItemsError,
+    //       accessoryItemsError: accessoryItemsError,
+    //       machineError: machineError,
+    //       usageStatus: status,
+    //       relatedBranch: req.mongoQuery.relatedBranch
+    //     },
+    //     { new: true }
+    //   );
+    //   var usageRecordResult = await UsageRecords.create({
+    //     relatedUsage: usageUpdate._id,
+    //     usageStatus: status,
+    //     procedureMedicine: procedureItemsFinished,
+    //     procedureAccessory: accessoryItemsFinished,
+    //     machine: machineFinished,
+    //     relatedBranch: req.mongoQuery.relatedBranch,
+    //     machineError: machineError,
+    //     procedureItemsError: procedureItemsError,
+    //     accessoryItemsError: accessoryItemsError
+    //   })
+    // }
     //error handling
     let response = { success: true }
     if (machineError.length > 0) response.machineError = machineError
