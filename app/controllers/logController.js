@@ -102,7 +102,7 @@ exports.createUsage = async (req, res) => {
       }
       //procedureAccessory
       if (procedureAccessory !== undefined) {
-        for (const e of procedureAccessory) {
+        for (const item of procedureAccessory) {
           let { item_id, actual } = item;
           console.log(item_id, 'here');
           const findResult = await stock.find({ relatedAccessoryItems: item_id, isDeleted: false }).sort({ seq: -1 });
@@ -125,7 +125,7 @@ exports.createUsage = async (req, res) => {
       }
       //machine
       if (machine !== undefined) {
-        for (const e of machine) {
+        for (const item of machine) {
           let { item_id, actual } = item;
           console.log(item_id, 'here');
           const findResult = await stock.find({ relatedMachine: item_id, isDeleted: false }).sort({ seq: -1 });
@@ -339,7 +339,7 @@ exports.createUsage = async (req, res) => {
 
     return res.status(200).send(response)
   } catch (error) {
-    // console.log(error)
+     console.log(error)
     return res.status(500).send({ error: true, message: error.message })
   }
 }
