@@ -6,6 +6,7 @@ const Machine = require('../models/fixedAsset');
 const Usage = require('../models/usage');
 const UsageRecords = require('../models/usageRecord');
 const stock = require('../models/stock');
+const Appointment = require('../models/appointment');
 
 exports.listAllLog = async (req, res) => {
   try {
