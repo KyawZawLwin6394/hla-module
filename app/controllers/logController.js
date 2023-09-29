@@ -166,7 +166,9 @@ exports.createUsage = async (req, res) => {
         accessoryItemsError: accessoryItemsError
       })
     }
-    // else {
+    else {
+      return res.status(200).send({error:true, message:'Already Used'})
+    }
     //   var usageRecordResult = await UsageRecords.find({ relatedUsage: appResult[0].relatedUsage }, { sort: { createdAt: -1 } })
     //   if (usageRecordResult.length > 0) {
     //     var URResult = await UsageRecords.find({ _id: usageRecordResult[0]._id })
