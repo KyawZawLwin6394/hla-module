@@ -81,93 +81,73 @@ exports.createUsage = async (req, res) => {
       if (procedureMedicine !== undefined) {
         for (const item of procedureMedicine) {
           let { item_id, actual } = item;
-          console.log(item_id, 'here');
           const findResult = await stock.find({ relatedProcedureItems: item_id, isDeleted: false }).sort({ seq: -1 });
-          const totalQty = findResult.reduce((accumulator, value) => accumulator + value.qty, 0);
-
+          const find = await stock.find({ relatedProcedureItems: item_id, isDeleted: false })
+          console.log(find)
+          const totalQty = find.reduce((accumulator, value) => accumulator + (value.qty || 0), 0);
+          console.log(totalQty)
           if (actual > totalQty) {
             return res.status(404).send({ error: true, message: 'Not Enough Qty', procedureItem: item_id });
-          }
-
-          for (const i of findResult) {
-            if (i.qty <= actual) {
-              await stock.findOneAndUpdate({ _id: i._id }, { $set: { isDeleted: true } });
-              actual -= i.qty;
-            } else {
-              await stock.findOneAndUpdate({ _id: i._id }, { $inc: { qty: -actual } });
-              actual = 0;
+          } else {
+            console.log('proceed')
+            for (const i of findResult) {
+              if (i.qty <= actual) {
+                await stock.findOneAndUpdate({ _id: i._id }, { $set: { isDeleted: true } });
+                actual -= i.qty;
+              } else {
+                await stock.findOneAndUpdate({ _id: i._id }, { $inc: { qty: -actual } });
+                actual = 0;
+              }
             }
           }
         }
       }
-      //procedureAccessory
+
       if (procedureAccessory !== undefined) {
         for (const item of procedureAccessory) {
           let { item_id, actual } = item;
-          console.log(item_id, 'here');
           const findResult = await stock.find({ relatedAccessoryItems: item_id, isDeleted: false }).sort({ seq: -1 });
-          const totalQty = findResult.reduce((accumulator, value) => accumulator + value.qty, 0);
-
+          const find = await stock.find({ relatedAccessoryItems: item_id, isDeleted: false })
+          console.log(find)
+          const totalQty = find.reduce((accumulator, value) => accumulator + (value.qty || 0), 0);
+          console.log(totalQty)
           if (actual > totalQty) {
             return res.status(404).send({ error: true, message: 'Not Enough Qty', procedureItem: item_id });
-          }
-
-          for (const i of findResult) {
-            if (i.qty <= actual) {
-              await stock.findOneAndUpdate({ _id: i._id }, { $set: { isDeleted: true } });
-              actual -= i.qty;
-            } else {
-              await stock.findOneAndUpdate({ _id: i._id }, { $inc: { qty: -actual } });
-              actual = 0;
+          } else {
+            console.log('proceed')
+            for (const i of findResult) {
+              if (i.qty <= actual) {
+                await stock.findOneAndUpdate({ _id: i._id }, { $set: { isDeleted: true } });
+                actual -= i.qty;
+              } else {
+                await stock.findOneAndUpdate({ _id: i._id }, { $inc: { qty: -actual } });
+                actual = 0;
+              }
             }
           }
         }
       }
-      //machine
-      if (machine !== undefined) {
-        for (const item of machine) {
-          let { item_id, actual } = item;
-          console.log(item_id, 'here');
-          const findResult = await stock.find({ relatedMachine: item_id, isDeleted: false }).sort({ seq: -1 });
-          const totalQty = findResult.reduce((accumulator, value) => accumulator + value.qty, 0);
 
-          if (actual > totalQty) {
-            return res.status(404).send({ error: true, message: 'Not Enough Qty', procedureItem: item_id });
-          }
-
-          for (const i of findResult) {
-            if (i.qty <= actual) {
-              await stock.findOneAndUpdate({ _id: i._id }, { $set: { isDeleted: true } });
-              actual -= i.qty;
-            } else {
-              await stock.findOneAndUpdate({ _id: i._id }, { $inc: { qty: -actual } });
-              actual = 0;
-            }
-          }
-        }
-      }
-      //usage create
       req.body = { ...req.body, machineError: machineError, usageStatus: status, procedureItemsError: procedureItemsError, accessoryItemsError: accessoryItemsError, procedureAccessory: accessoryItemsFinished, procedureMedicine: procedureItemsFinished, machine: machineFinished }
       var usageResult = await Usage.create(req.body);
-      var appointmentUpdate = await Appointment.findOneAndUpdate(
-        { _id: req.body.relatedAppointment },
-        { usageStatus: status, relatedUsage: usageResult._id },
-        { new: true }
-      )
+      // var appointmentUpdate = await Appointment.findOneAndUpdate(
+      //   { _id: req.body.relatedAppointment },
+      //   { usageStatus: status, relatedUsage: usageResult._id },
+      //   { new: true }
+      // )
       var usageRecordResult = await UsageRecords.create({
         relatedUsage: usageResult._id,
         usageStatus: status,
         procedureMedicine: procedureItemsFinished,
         procedureAccessory: accessoryItemsFinished,
         machine: machineFinished,
-        relatedBranch: req.mongoQuery.relatedBranch,
         machineError: machineError,
         procedureItemsError: procedureItemsError,
         accessoryItemsError: accessoryItemsError
       })
     }
     else {
-      return res.status(200).send({error:true, message:'Already Used'})
+      return res.status(200).send({ error: true, message: 'Already Used' })
     }
     //   var usageRecordResult = await UsageRecords.find({ relatedUsage: appResult[0].relatedUsage }, { sort: { createdAt: -1 } })
     //   if (usageRecordResult.length > 0) {
@@ -330,18 +310,15 @@ exports.createUsage = async (req, res) => {
     // }
     //error handling
     let response = { success: true }
-    if (machineError.length > 0) response.machineError = machineError
-    if (procedureItemsError.length > 0) response.procedureItemsError = procedureItemsError
-    if (accessoryItemsError.length > 0) response.accessoryItemsError = accessoryItemsError
     if (usageResult !== undefined) response.usageResult = usageResult
     if (usageRecordResult !== undefined) response.usageRecordResult = usageRecordResult
-    if (appointmentUpdate !== undefined) response.appointmentUpdate = appointmentUpdate
-    if (URResult !== undefined) response.URResult = URResult
-    if (usageUpdate !== undefined) response.usageUpdate = usageUpdate
+    // if (appointmentUpdate !== undefined) response.appointmentUpdate = appointmentUpdate
+    // if (URResult !== undefined) response.URResult = URResult
+    // if (usageUpdate !== undefined) response.usageUpdate = usageUpdate
 
     return res.status(200).send(response)
   } catch (error) {
-     console.log(error)
+    console.log(error)
     return res.status(500).send({ error: true, message: error.message })
   }
 }
