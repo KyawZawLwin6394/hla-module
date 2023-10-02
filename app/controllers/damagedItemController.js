@@ -5,11 +5,11 @@ const Stock = require('../models/stock');
 exports.listAllDamagedItems = async (req, res) => {
   try {
     let result = await DamagedItem.find({ isDeleted: false }).populate({
-      path:'relatedStockRecord',
-      model:'Stocks',
-      populate:{
-        path:'relatedMedicineItems',
-        model:'MedicineItems'
+      path: 'relatedStockRecord',
+      model: 'Stocks',
+      populate: {
+        path: 'relatedMedicineItems',
+        model: 'MedicineItems'
       }
     });
     let count = await DamagedItem.find({ isDeleted: false }).count();
@@ -32,8 +32,9 @@ exports.getDamagedItem = async (req, res) => {
 
 exports.createDamagedItem = async (req, res, next) => {
   try {
-    const { relatedStockRecord, damagedCurrentQty, damagedTotalUnit } = req.body;
-    const stockUpdate = await Stock.findOneAndUpdate({ _id: relatedStockRecord }, { $inc: { qty: -damagedCurrentQty, totalUnit: -damagedTotalUnit } }, { new: true })
+    const { relatedStockRecord, damagedCurrentQty, purchasePrice } = req.body;
+
+    const stockUpdate = await Stock.findOneAndUpdate({ _id: relatedStockRecord }, { $inc: { qty: -damagedCurrentQty, batchPrice: -(damagedCurrentQty * purchasePrice) } }, { new: true })
     const newDamagedItem = new DamagedItem(req.body);
     const result = await newDamagedItem.save();
     res.status(200).send({
