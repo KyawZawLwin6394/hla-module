@@ -77,7 +77,7 @@ exports.listAllStocks = async (req, res) => {
 
 exports.getStock = async (req, res) => {
     const { relatedProcedureItems, relatedMedicineItems, relatedAccessoryItems, relatedMachine, start, end } = req.query;
-    let query = { isDelated: false }
+    let query = { isDeleted: false }
     if (start && end) query.createdAt = { $gte: start, $lte: end }
     if (relatedProcedureItems) query.relatedProcedureItems = relatedProcedureItems;
     if (relatedMedicineItems) query.relatedMedicineItems = relatedMedicineItems;
