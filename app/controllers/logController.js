@@ -100,9 +100,7 @@ exports.createUsage = async (req, res) => {
               }
             }
             //update master item's qty 
-            const findThis = await stock.find({ relatedProcedureItems: item_id, isDeleted: false })
-            const finalQty = find.reduce((accumulator, value) => accumulator + (value.qty || 0), 0);
-            const procedureUpdate = await ProcedureItem.findOneAndUpdate({ _id: item_id }, { currentQuantity: finalQty })
+            const procedureUpdate = await ProcedureItem.findOneAndUpdate({ _id: item_id }, { currentQuantity: actual })
           }
         }
       }
@@ -128,9 +126,7 @@ exports.createUsage = async (req, res) => {
                 actual = 0;
               }
             }
-            const findThis = await stock.find({ relatedAccessoryItems: item_id, isDeleted: false })
-            const finalQty = find.reduce((accumulator, value) => accumulator + (value.qty || 0), 0);
-            const accessoryItemUpdate = await AccessoryItem.findOneAndUpdate({ _id: item_id }, { currentQuantity: finalQty })
+            const accessoryItemUpdate = await AccessoryItem.findOneAndUpdate({ _id: item_id }, { currentQuantity: actual })
           }
         }
       }
