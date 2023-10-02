@@ -137,11 +137,11 @@ exports.createUsage = async (req, res) => {
 
       req.body = { ...req.body, machineError: machineError, usageStatus: status, procedureItemsError: procedureItemsError, accessoryItemsError: accessoryItemsError, procedureAccessory: accessoryItemsFinished, procedureMedicine: procedureItemsFinished, machine: machineFinished }
       var usageResult = await Usage.create(req.body);
-      // var appointmentUpdate = await Appointment.findOneAndUpdate(
-      //   { _id: req.body.relatedAppointment },
-      //   { usageStatus: status, relatedUsage: usageResult._id },
-      //   { new: true }
-      // )
+      var appointmentUpdate = await Appointment.findOneAndUpdate(
+        { _id: req.body.relatedAppointment },
+        { usageStatus: status, relatedUsage: usageResult._id },
+        { new: true }
+      )
       var usageRecordResult = await UsageRecords.create({
         relatedUsage: usageResult._id,
         usageStatus: status,
