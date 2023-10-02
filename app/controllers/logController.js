@@ -80,13 +80,14 @@ exports.createUsage = async (req, res) => {
 
       if (procedureMedicine !== undefined) {
         for (const item of procedureMedicine) {
+          const actualQty = item.actual
           let { item_id, actual } = item;
           const findResult = await stock.find({ relatedProcedureItems: item_id, isDeleted: false }).sort({ seq: -1 });
           const find = await stock.find({ relatedProcedureItems: item_id, isDeleted: false })
           console.log(find)
           const totalQty = find.reduce((accumulator, value) => accumulator + (value.qty || 0), 0);
           console.log(totalQty)
-          if (actual > totalQty) {
+          if (actual >= totalQty) {
             return res.status(404).send({ error: true, message: 'Not Enough Qty', procedureItem: item_id });
           } else {
             console.log('proceed')
@@ -100,20 +101,22 @@ exports.createUsage = async (req, res) => {
               }
             }
             //update master item's qty 
-            const procedureUpdate = await ProcedureItem.findOneAndUpdate({ _id: item_id }, { $inc: { currentQuantity: -actual } })
+            const procedureUpdate = await ProcedureItem.findOneAndUpdate({ _id: item_id }, { $inc: { currentQuantity: -actualQty } }, { new: true })
+            console.log(procedureUpdate, 'here', actual)
           }
         }
       }
 
       if (procedureAccessory !== undefined) {
         for (const item of procedureAccessory) {
+          const actualQty = item.actual
           let { item_id, actual } = item;
           const findResult = await stock.find({ relatedAccessoryItems: item_id, isDeleted: false }).sort({ seq: -1 });
           const find = await stock.find({ relatedAccessoryItems: item_id, isDeleted: false })
           console.log(find)
           const totalQty = find.reduce((accumulator, value) => accumulator + (value.qty || 0), 0);
           console.log(totalQty)
-          if (actual > totalQty) {
+          if (actual >= totalQty) {
             return res.status(404).send({ error: true, message: 'Not Enough Qty', procedureItem: item_id });
           } else {
             console.log('proceed')
@@ -126,7 +129,8 @@ exports.createUsage = async (req, res) => {
                 actual = 0;
               }
             }
-            const accessoryItemUpdate = await AccessoryItem.findOneAndUpdate({ _id: item_id }, { $inc: { currentQuantity: -actual } })
+            const accessoryItemUpdate = await AccessoryItem.findOneAndUpdate({ _id: item_id }, { $inc: { currentQuantity: -actualQty } }, { new: true })
+            console.log(accessoryItemUpdate, 'here', actual)
           }
         }
       }
