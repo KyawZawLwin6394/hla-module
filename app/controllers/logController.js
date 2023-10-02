@@ -100,7 +100,7 @@ exports.createUsage = async (req, res) => {
               }
             }
             //update master item's qty 
-            const procedureUpdate = await ProcedureItem.findOneAndUpdate({ _id: item_id }, { currentQuantity: actual })
+            const procedureUpdate = await ProcedureItem.findOneAndUpdate({ _id: item_id }, { $inc: { currentQuantity: -actual } })
           }
         }
       }
@@ -126,7 +126,7 @@ exports.createUsage = async (req, res) => {
                 actual = 0;
               }
             }
-            const accessoryItemUpdate = await AccessoryItem.findOneAndUpdate({ _id: item_id }, { currentQuantity: actual })
+            const accessoryItemUpdate = await AccessoryItem.findOneAndUpdate({ _id: item_id }, { $inc: { currentQuantity: -actual } })
           }
         }
       }
