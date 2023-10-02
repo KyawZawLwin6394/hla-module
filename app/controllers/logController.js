@@ -329,3 +329,20 @@ exports.createUsage = async (req, res) => {
     return res.status(500).send({ error: true, message: error.message })
   }
 }
+
+exports.showUsageQty = async (req, res) => {
+  try {
+    let response = { success: true }
+    if (req.body.relatedAccessoryItems) {
+      const getAccessoryItems = await AccessoryItem.find({ _id: { $in: req.body.relatedAccessoryItems } }).select('_id currentQuantity')
+      response.relatedAccessoryItems = getAccessoryItems
+    }
+    if (req.body.relatedProcedureItems) {
+      const getProcedureItems = await ProcedureItem.find({ _id: { $in: req.body.relatedProcedureItems } }).select('_id currentQuantity')
+      response.relatedProcedureItems = getProcedureItems
+    }
+    return res.status(200).send(response)
+  } catch (error) {
+    return res.status(500).send({ error: true, message: error.message })
+  }
+}
