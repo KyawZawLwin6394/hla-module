@@ -121,9 +121,32 @@ exports.updateStock = async (req, res, next) => {
 
 exports.deleteStock = async (req, res, next) => {
     try {
-        const result = await Stock.deleteOne(
-            { _id: req.params.id }
+        const result = await Stock.findOneAndUpdate(
+            { _id: req.params.id },
+            { isDeleted: true },
+            { new: true }
         );
+        console.log(result)
+        if (result.relatedAccessoryItems) {
+            console.log(result.relatedAccessoryItems)
+            const updateMasterItem = await AccessoryItems.findOneAndUpdate(
+                { _id: result.relatedAccessoryItems },
+                { $inc: { currentQuantity: -result.qty } },
+                { new: true }
+            )
+        } else if (result.relatedMedicineItems) {
+            const updateMasterItem = await MedicineItems.findOneAndUpdate(
+                { _id: result.relatedMedicineItems },
+                { $inc: { currentQuantity: -result.qty } },
+                { new: true }
+            )
+        } else if (result.relatedProcedureItems) {
+            const updateMasterItem = await ProcedureItems.findOneAndUpdate(
+                { _id: result.relatedProcedureItems },
+                { $inc: { currentQuantity: -result.qty } },
+                { new: true }
+            )
+        }
         return res.status(200).send({ success: true, data: { isDeleted: result.isDeleted } });
     } catch (error) {
         return res.status(500).send({ "error": true, "message": error.message })
