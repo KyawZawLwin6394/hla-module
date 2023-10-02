@@ -83,6 +83,7 @@ exports.getStock = async (req, res) => {
     if (relatedMedicineItems) query.relatedMedicineItems = relatedMedicineItems;
     if (relatedAccessoryItems) query.relatedAccessoryItems = relatedAccessoryItems;
     if (relatedMachine) query.relatedMachine = relatedMachine;
+    console.log(query)
     const result = await Stock.find(query).populate('relatedProcedureItems relatedMedicineItems relatedAccessoryItems relatedMachine')
     if (result.length === 0)
         return res.status(500).json({ error: true, message: 'No Record Found' });
