@@ -121,10 +121,8 @@ exports.updateStock = async (req, res, next) => {
 
 exports.deleteStock = async (req, res, next) => {
     try {
-        const result = await Stock.findOneAndUpdate(
-            { _id: req.params.id },
-            { isDeleted: true },
-            { new: true },
+        const result = await Stock.deleteOne(
+            { _id: req.params.id }
         );
         return res.status(200).send({ success: true, data: { isDeleted: result.isDeleted } });
     } catch (error) {
