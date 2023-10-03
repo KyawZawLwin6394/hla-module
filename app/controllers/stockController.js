@@ -113,13 +113,34 @@ exports.updateStock = async (req, res, next) => {
             const newBatchPrice = req.body.qty * req.body.purchasePrice
             req.body.batchPrice = newBatchPrice
         }
+
         const result = await Stock.findOneAndUpdate(
             { _id: req.body.id },
             req.body,
             { new: true },
         ).populate('relatedProcedureItems relatedMedicineItems relatedAccessoryItems relatedMachine')
 
-
+        //update master iteM
+        if (result.relatedAccessoryItems) {
+            console.log(result.relatedAccessoryItems)
+            const updateMasterItem = await AccessoryItems.findOneAndUpdate(
+                { _id: result.relatedAccessoryItems },
+                { currentQuantity: result.qty },
+                { new: true }
+            )
+        } else if (result.relatedMedicineItems) {
+            const updateMasterItem = await MedicineItems.findOneAndUpdate(
+                { _id: result.relatedMedicineItems },
+                { currentQuantity: result.qty },
+                { new: true }
+            )
+        } else if (result.relatedProcedureItems) {
+            const updateMasterItem = await ProcedureItems.findOneAndUpdate(
+                { _id: result.relatedProcedureItems },
+                { currentQuantity: result.qty },
+                { new: true }
+            )
+        }
         return res.status(200).send({ success: true, data: result });
     } catch (error) {
         return res.status(500).send({ "error": true, "message": error.message })
