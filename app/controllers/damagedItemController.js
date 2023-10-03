@@ -66,7 +66,7 @@ exports.createDamagedItem = async (req, res, next) => {
       const update = await MedicineItems.findOneAndUpdate({ _id: relatedMedicineItems }, { currentQuantity: totalQty })
       const logResult = await Logs.create({
         type: 'Damaged',
-        relatedProcedureItems: relatedProcedureItems,
+        relatedMedicineItems: relatedMedicineItems,
         date: Date.now(),
         currentQty: damagedCurrentQty + totalQty,
         actualQty: damagedCurrentQty,
@@ -84,7 +84,7 @@ exports.createDamagedItem = async (req, res, next) => {
       const update = await AccessoryItems.findOneAndUpdate({ _id: relatedAccessoryItems }, { currentQuantity: totalQty })
       const logResult = await Logs.create({
         type: 'Damaged',
-        relatedProcedureItems: relatedProcedureItems,
+        relatedAccessoryItems: relatedAccessoryItems,
         date: Date.now(),
         currentQty: damagedCurrentQty + totalQty,
         actualQty: damagedCurrentQty,
