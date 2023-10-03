@@ -62,7 +62,7 @@ let LogSchema = new Schema({
     },
     type: {
         type: String,
-        enum: ['Stock Transfer', 'Usage', 'Request Recieved', 'Stock Update', 'Medicine Sale']
+        enum: ['Stock Transfer', 'Usage', 'Request Recieved', 'Stock Update', 'Medicine Sale', 'Damaged']
     }
 });
 

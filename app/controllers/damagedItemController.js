@@ -4,6 +4,8 @@ const Stock = require('../models/stock');
 const ProcedureItems = require('../models/procedureItem');
 const AccessoryItems = require('../models/accessoryItem');
 const MedicineItems = require('../models/medicineItem');
+const Logs = require('../models/log');
+
 exports.listAllDamagedItems = async (req, res) => {
   try {
     let result = await DamagedItem.find({ isDeleted: false }).populate({
@@ -44,6 +46,14 @@ exports.createDamagedItem = async (req, res, next) => {
       const totalQty = stock.reduce((accumulator, current) => accumulator + current.qty, 0)
       console.log(totalQty)
       const update = await ProcedureItems.findOneAndUpdate({ _id: relatedProcedureItems }, { currentQuantity: totalQty })
+      const logResult = await Logs.create({
+        type: 'Damaged',
+        relatedProcedureItems: relatedProcedureItems,
+        date: Date.now(),
+        currentQty: damagedCurrentQty + totalQty,
+        actualQty: damagedCurrentQty,
+        finalQty: totalQty
+      })
     }
 
     // Handle relatedMedicineItems
@@ -54,6 +64,14 @@ exports.createDamagedItem = async (req, res, next) => {
       console.log(totalQty)
       // Update MedicineItems
       const update = await MedicineItems.findOneAndUpdate({ _id: relatedMedicineItems }, { currentQuantity: totalQty })
+      const logResult = await Logs.create({
+        type: 'Damaged',
+        relatedProcedureItems: relatedProcedureItems,
+        date: Date.now(),
+        currentQty: damagedCurrentQty + totalQty,
+        actualQty: damagedCurrentQty,
+        finalQty: totalQty
+      })
     }
 
     // Handle relatedAccessoryItems
@@ -64,6 +82,14 @@ exports.createDamagedItem = async (req, res, next) => {
       console.log(totalQty)
       // Update AccessoryItems
       const update = await AccessoryItems.findOneAndUpdate({ _id: relatedAccessoryItems }, { currentQuantity: totalQty })
+      const logResult = await Logs.create({
+        type: 'Damaged',
+        relatedProcedureItems: relatedProcedureItems,
+        date: Date.now(),
+        currentQty: damagedCurrentQty + totalQty,
+        actualQty: damagedCurrentQty,
+        finalQty: totalQty
+      })
     }
 
     const newDamagedItem = new DamagedItem(req.body);
