@@ -121,7 +121,7 @@ exports.createProcedureHistory = async (req, res, next) => {
         const findResult = await stock.find({ relatedMedicineItems: item_id, isDeleted: false }).sort({ seq: -1 });
         const find = await stock.find({ relatedMedicineItems: item_id, isDeleted: false })
         console.log(find)
-        const totalQty = find.reduce((accumulator, value) => accumulator + (value.qty || 0), 0);
+        const totalQty = find.reduce((accumulator, value) => accumulator + (parseInt(value.qty) || 0), 0);
         console.log(totalQty)
         if (actual >= totalQty) {
           return res.status(404).send({ error: true, message: 'Not Enough Qty', medicineItem: item_id });
@@ -142,7 +142,6 @@ exports.createProcedureHistory = async (req, res, next) => {
         }
       }
     }
-
     const result = await procedureHistory.create(data);
     const populate = await procedureHistory.find({ _id: result._id }).populate('medicineItems.item_id customTreatmentPackages.item_id pHistory relatedAppointment relatedTreatmentSelection')
     res.status(200).send({
