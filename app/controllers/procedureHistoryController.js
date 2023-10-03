@@ -4,7 +4,7 @@ const Attachment = require('../models/attachment');
 const procedureHistory = require('../models/procedureHistory');
 const MedicineItems = require('../models/medicineItem');
 const stock = require('../models/stock');
-const medicineItem = require('../models/medicineItem');
+const Log = require('../models/log');
 
 exports.listAllProcedureHistorys = async (req, res) => {
   let { keyword, role, limit, skip } = req.query;
@@ -140,6 +140,14 @@ exports.createProcedureHistory = async (req, res, next) => {
           //update master item's qty 
           const procedureUpdate = await MedicineItems.findOneAndUpdate({ _id: item_id }, { $inc: { currentQuantity: -actualQty } }, { new: true })
           console.log(procedureUpdate, 'here', actual)
+          const logCreate = await Log.create({
+            type: 'Usage',
+            relatedMedicineItems: item_id,
+            currentQty: totalQty,
+            actualQty: actual,
+            finalQty: totalQty - actual,
+            date: Date.now()
+          })
         }
       }
     }
