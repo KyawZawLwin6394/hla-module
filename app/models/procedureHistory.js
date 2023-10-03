@@ -18,13 +18,14 @@ let ProcedureHistorySchema = new Schema({
             ref: 'MedicineItems'
         },
         qty: Number,
+        actual: Number,
         duration: Number,
         dose: String,
         totalQTY: Number,
         subTotal: Number,
         SIG: String,
         subSIG: String,
-        remark:String
+        remark: String
     }],
     // treatmentPackages: [{
     //     item_id: {

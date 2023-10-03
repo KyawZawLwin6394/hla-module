@@ -128,6 +128,7 @@ exports.createProcedureHistory = async (req, res, next) => {
         } else {
           console.log('proceed')
           for (const i of findResult) {
+            console.log(actual)
             if (i.qty <= actual) {
               await stock.findOneAndUpdate({ _id: i._id }, { $set: { isDeleted: true } });
               actual -= i.qty;
