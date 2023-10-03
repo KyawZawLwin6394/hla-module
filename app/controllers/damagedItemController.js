@@ -41,7 +41,7 @@ exports.createDamagedItem = async (req, res, next) => {
 
     // Handle relatedProcedureItems
     if (relatedProcedureItems) {
-      const stock = await Stock.find({ relatedProcedureItems: relatedProcedureItems })
+      const stock = await Stock.find({ relatedProcedureItems: relatedProcedureItems, isDeleted: false })
       if (stock.length === 0) return res.status(200).send({ error: true, message: 'ProcedureItems Stock Not Found!' })
       const totalQty = stock.reduce((accumulator, current) => accumulator + current.qty, 0)
       console.log(totalQty)
@@ -58,7 +58,7 @@ exports.createDamagedItem = async (req, res, next) => {
 
     // Handle relatedMedicineItems
     if (relatedMedicineItems) {
-      const stock = await Stock.find({ relatedMedicineItems: relatedMedicineItems })
+      const stock = await Stock.find({ relatedMedicineItems: relatedMedicineItems, isDeleted: false })
       if (stock.length === 0) return res.status(200).send({ error: true, message: 'MedicineItems Stock Not Found!' })
       const totalQty = stock.reduce((accumulator, current) => accumulator + current.qty, 0)
       console.log(totalQty)
@@ -76,7 +76,7 @@ exports.createDamagedItem = async (req, res, next) => {
 
     // Handle relatedAccessoryItems
     if (relatedAccessoryItems) {
-      const stock = await Stock.find({ relatedAccessoryItems: relatedAccessoryItems })
+      const stock = await Stock.find({ relatedAccessoryItems: relatedAccessoryItems, isDeleted: false })
       if (stock.length === 0) return res.status(200).send({ error: true, message: 'AccessoryItems Stock Not Found!' })
       const totalQty = stock.reduce((accumulator, current) => accumulator + current.qty, 0)
       console.log(totalQty)
