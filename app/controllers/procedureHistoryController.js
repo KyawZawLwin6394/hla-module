@@ -4,6 +4,7 @@ const Attachment = require('../models/attachment');
 const procedureHistory = require('../models/procedureHistory');
 const MedicineItems = require('../models/medicineItem');
 const stock = require('../models/stock');
+const medicineItem = require('../models/medicineItem');
 
 exports.listAllProcedureHistorys = async (req, res) => {
   let { keyword, role, limit, skip } = req.query;
@@ -113,36 +114,32 @@ exports.createProcedureHistory = async (req, res, next) => {
         data.after.push(attachResult._id.toString());
       }
     }
-    if (medicineItems) {
-      try {
-        const parsed = JSON.parse(medicineItems);
-
-        for (const item of parsed) {
-          let { item_id, qty } = item;
-          console.log(item_id, 'here');
-          const findResult = await stock.find({ relatedMedicineItems: item_id._id, isDeleted: false }).sort({ seq: -1 });
-          const totalQty = findResult.reduce((accumulator, value) => accumulator + value.qty, 0);
-
-          if (qty > totalQty) {
-            return res.status(404).send({ error: true, message: 'Not Enough Qty', medicineID: item_id });
-          }
-
+    if (medicineItems !== undefined) {
+      for (const item of medicineItems) {
+        const actualQty = item.actual
+        let { item_id, actual } = item;
+        const findResult = await stock.find({ relatedMedicineItems: item_id, isDeleted: false }).sort({ seq: -1 });
+        const find = await stock.find({ relatedMedicineItems: item_id, isDeleted: false })
+        console.log(find)
+        const totalQty = find.reduce((accumulator, value) => accumulator + (value.qty || 0), 0);
+        console.log(totalQty)
+        if (actual >= totalQty) {
+          return res.status(404).send({ error: true, message: 'Not Enough Qty', medicineItem: item_id });
+        } else {
+          console.log('proceed')
           for (const i of findResult) {
-            if (i.qty <= qty) {
+            if (i.qty <= actual) {
               await stock.findOneAndUpdate({ _id: i._id }, { $set: { isDeleted: true } });
-              qty -= i.qty;
+              actual -= i.qty;
             } else {
-              await stock.findOneAndUpdate({ _id: i._id }, { $inc: { qty: -qty } });
-              qty = 0;
+              await stock.findOneAndUpdate({ _id: i._id }, { $inc: { qty: -actual } });
+              actual = 0;
             }
           }
+          //update master item's qty 
+          const procedureUpdate = await MedicineItems.findOneAndUpdate({ _id: item_id }, { $inc: { currentQuantity: -actualQty } }, { new: true })
+          console.log(procedureUpdate, 'here', actual)
         }
-        // Assuming you want to update 'data' after processing medicine items
-        data = { ...data, medicineItems: parsed };
-
-      } catch (error) {
-        // Handle JSON parsing errors or other potential errors gracefully
-        return res.status(500).send({ error: true, message: error });
       }
     }
 
