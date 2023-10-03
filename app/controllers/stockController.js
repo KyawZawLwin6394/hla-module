@@ -108,11 +108,18 @@ exports.createStock = async (req, res, next) => {
 
 exports.updateStock = async (req, res, next) => {
     try {
+        //calculate batchPrice
+        if (req.body.qty && req.body.purchasePrice) {
+            const newBatchPrice = req.body.qty * req.body.purchasePrice
+            req.body.batchPrice = newBatchPrice
+        }
         const result = await Stock.findOneAndUpdate(
             { _id: req.body.id },
             req.body,
             { new: true },
         ).populate('relatedProcedureItems relatedMedicineItems relatedAccessoryItems relatedMachine')
+
+
         return res.status(200).send({ success: true, data: result });
     } catch (error) {
         return res.status(500).send({ "error": true, "message": error.message })
