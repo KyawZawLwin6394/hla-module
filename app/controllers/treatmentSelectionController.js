@@ -100,10 +100,24 @@ exports.getTreatmentSelection = async (req, res) => {
         }]
     }).populate({
         path: 'relatedAppointments',
-        populate: [{
+        populate: {
             path: 'relatedUsage',
-            model: 'Usages'
-        }]
+            model: 'Usages',
+            populate: [
+                {
+                    path: 'procedureMedicine.item_id',
+                    model: 'ProcedureItems'
+                },
+                {
+                    path: 'procedureAccessory.item_id',
+                    model: 'AccessoryItems'
+                },
+                {
+                    path: 'machine.item_id',
+                    model: 'FixedAssets'
+                }
+            ]
+        }
     })
     if (!result)
         return res.status(500).json({ error: true, message: 'No Record Found' });
