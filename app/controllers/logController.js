@@ -148,8 +148,14 @@ exports.createUsage = async (req, res) => {
         }
       }
 
-      req.body = { ...req.body, machineError: machineError, usageStatus: status, procedureItemsError: procedureItemsError, accessoryItemsError: accessoryItemsError, procedureAccessory: accessoryItemsFinished, procedureMedicine: procedureItemsFinished, machine: machineFinished }
-      var usageResult = await Usage.create(req.body);
+      req.body = { ...req.body, machineError: machineError, usageStatus: status, procedureItemsError: procedureItemsError, accessoryItemsError: accessoryItemsError}
+      console.log(req.body.procedureMedicine, req.body.procedureAccessory)
+      var usageResult = await Usage.create({
+        relatedTreatmentSelection: req.body.relatedTreatmentSelection,
+        relatedAppointment: req.body.relatedAppointment,
+        procedureMedicine: req.body.procedureMedicine,
+        procedureAccessory: req.body.procedureAccessory
+      });
       var appointmentUpdate = await Appointment.findOneAndUpdate(
         { _id: req.body.relatedAppointment },
         { usageStatus: status, relatedUsage: usageResult._id },
