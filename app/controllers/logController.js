@@ -106,8 +106,8 @@ exports.createUsage = async (req, res) => {
               type: 'Usage',
               relatedProcedureItems: item_id,
               currentQty: totalQty,
-              actualQty: actual,
-              finalQty: totalQty - actual,
+              actualQty: actualQty,
+              finalQty: totalQty - actualQty,
               date: Date.now()
             })
           }
@@ -140,8 +140,8 @@ exports.createUsage = async (req, res) => {
               type: 'Usage',
               relatedAccessoryItems: item_id,
               currentQty: totalQty,
-              actualQty: actual,
-              finalQty: totalQty - actual,
+              actualQty: actualQty,
+              finalQty: totalQty - actualQty,
               date: Date.now()
             })
           }
